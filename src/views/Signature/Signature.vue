@@ -471,7 +471,8 @@ export default {
         // location.reload()
         // alert('window resize')
         this.porpertyInit() // 需要重新初始化属性
-        this.clearTrace() // 需要清除重绘数据
+        // this.clearTrace() // 需要清除重绘数据
+        this.rePaint()
       }.bind(this)
     )
     /* 文件选择并导入新轨迹 */
