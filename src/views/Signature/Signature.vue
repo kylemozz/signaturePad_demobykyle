@@ -94,6 +94,16 @@
           >窗口</a-button
         >
       </a-menu-item> -->
+      <!-- <a-menu-item class="menu-item">
+        <a-button class="menu-btn small-width" @click="dataTest()"
+          >导出测试</a-button
+        >
+      </a-menu-item>
+      <a-menu-item class="menu-item">
+        <a-button class="menu-btn small-width" @click="dataTest2()"
+          >导入测试</a-button
+        >
+      </a-menu-item> -->
       <a-menu-item class="menu-item">
         <span>粗细：</span
         ><a-input
@@ -132,7 +142,8 @@ export default {
       imageInputBtn: '', // 图片选择输入按扭
       image: '', // 导入的图片
       imageToInsert: '', // 要导入canvas的图片
-      newTrace: '' // 导入的新轨迹
+      newTrace: '', // 导入的新轨迹
+      ImageData: ''
     }
   },
   watch: {
@@ -146,6 +157,18 @@ export default {
     }
   },
   methods: {
+    // dataTest () {
+    //   this.ImageData = this.cxt.getImageData(
+    //     0,
+    //     0,
+    //     this.canvas.width,
+    //     this.canvas.height
+    //   )
+    //   console.log(ImageData)
+    // },
+    // dataTest2 () {
+    //   this.cxt.putImageData(this.ImageData, 0, 0)
+    // },
     image2Canvas () {
       var img = new Image()
       // console.log(this.imageToInsert)
@@ -220,6 +243,14 @@ export default {
     /* 保存轨迹文件 */
     saveTraceAsJSON () {
       var content = JSON.stringify(this.trace) // 转换为JSON格式
+      // var content = JSON.stringify(
+      //   (this.ImageData = this.cxt.getImageData(
+      //     0,
+      //     0,
+      //     this.canvas.width,
+      //     this.canvas.height
+      //   ))
+      // )
       // console.log(content)
       var jsonLink = document.createElement('a')
       jsonLink.download = 'trace.json'
@@ -375,7 +406,8 @@ export default {
     },
     clear () {
       // this.clearTrace()
-      this.image = ''
+      // 把导入的图片和画布一起清除
+      // this.image = ''
       this.clearCanvas()
     },
     /* 清除当前canvas的内容 */
@@ -514,7 +546,7 @@ export default {
         reader.readAsText(this.file[0])
         reader.onload = function () {
           this.newTrace = JSON.parse(reader.result)
-          this.trace = this.newTrace
+          this.trace = this.trace.concat(this.newTrace)
         }.bind(this)
       }.bind(this)
     )
