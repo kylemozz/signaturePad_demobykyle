@@ -304,8 +304,8 @@ export default {
       this.lineColor = '#000'
       this.canvasBgColor = '#fff'
       // 这里设置宽高等于可见宽高很重要
-      this.canvas.width = this.canvas.clientWidth
-      this.canvas.height = this.canvas.clientHeight
+      // this.canvas.width = this.canvas.clientWidth
+      // this.canvas.height = this.canvas.clientHeight
       this.windowToCanvas() // 强制与窗口化大小保持一致
       this.cxt = this.canvas.getContext('2d')
       this.cxt.fillStyle = this.canvasBgColor // 填充颜色设定
