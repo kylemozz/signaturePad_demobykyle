@@ -476,12 +476,17 @@ export default {
         e.changedTouches[0].pageX 触点的X坐标
         e.changedTouches[0].pageY 触点的Y坐标
         */
-        this.beginAndMove(e.changedTouches[0].pageX, e.changedTouches[0].pageY)
-        this.traceInput(
-          e.changedTouches[0].pageX,
-          e.changedTouches[0].pageY,
-          false
-        ) // 记录鼠标开始时坐标
+        if (!this.eraserFlag) {
+          this.beginAndMove(
+            e.changedTouches[0].pageX,
+            e.changedTouches[0].pageY
+          )
+          this.traceInput(
+            e.changedTouches[0].pageX,
+            e.changedTouches[0].pageY,
+            false
+          ) // 记录鼠标开始时坐标
+        }
       }.bind(this)
     )
 
@@ -489,13 +494,15 @@ export default {
     this.canvas.addEventListener(
       'touchmove',
       function (e) {
-        // console.log(e.changedTouches[0].pageX,event.changedTouches[0].pageY)
-        this.traceInput(
-          e.changedTouches[0].pageX,
-          e.changedTouches[0].pageY,
-          false
-        ) // 记录鼠标移动时坐标
-        this.draw(e.changedTouches[0].pageX, e.changedTouches[0].pageY)
+        if (!this.eraserFlag) {
+          // console.log(e.changedTouches[0].pageX,event.changedTouches[0].pageY)
+          this.traceInput(
+            e.changedTouches[0].pageX,
+            e.changedTouches[0].pageY,
+            false
+          ) // 记录鼠标移动时坐标
+          this.draw(e.changedTouches[0].pageX, e.changedTouches[0].pageY)
+        }
       }.bind(this)
     )
 
@@ -503,12 +510,14 @@ export default {
     this.canvas.addEventListener(
       'touchend',
       function (e) {
-        this.traceInput(
-          e.changedTouches[0].pageX,
-          e.changedTouches[0].pageY,
-          true
-        ) // 记录鼠标结束时坐标
-        this.close()
+        if (!this.eraserFlag) {
+          this.traceInput(
+            e.changedTouches[0].pageX,
+            e.changedTouches[0].pageY,
+            true
+          ) // 记录鼠标结束时坐标
+          this.close()
+        }
       }.bind(this)
     )
     /* 禁止移动端默认拖拽事件 */
@@ -562,6 +571,24 @@ export default {
     )
 
     /* 橡皮差 */
+    this.canvas.addEventListener(
+      'touchmove',
+      function (e) {
+        if (this.eraserFlag) {
+          // console.log('eraserTrriger')
+          // console.log(this.checkTrace(e.pageX, e.pageY))
+          var index = this.checkTrace(
+            e.changedTouches[0].pageX,
+            e.changedTouches[0].pageY
+          )
+          if (index !== -1) {
+            // console.log(index)
+            // console.log(this.trace)
+            this.removeThisLine(index)
+          }
+        }
+      }.bind(this)
+    )
 
     this.canvas.addEventListener(
       'mousemove',
