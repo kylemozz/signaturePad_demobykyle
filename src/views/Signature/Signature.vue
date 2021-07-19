@@ -84,6 +84,14 @@
           >撤回</a-button
         >
       </a-menu-item>
+      <a-menu-item class="menu-item">
+        <a-button
+          :type="eraserFlag ? 'primary' : ''"
+          class="menu-btn small-width"
+          @click="eraserTrigger()"
+          >橡皮擦</a-button
+        >
+      </a-menu-item>
       <!-- <a-menu-item class="menu-item">
         <a-button class="menu-btn small-width" @click="findMark()"
           >断点</a-button
@@ -143,7 +151,8 @@ export default {
       image: '', // 导入的图片
       imageToInsert: '', // 要导入canvas的图片
       newTrace: '', // 导入的新轨迹
-      ImageData: ''
+      // ImageData: ''
+      eraserFlag: false
     }
   },
   watch: {
@@ -169,6 +178,42 @@ export default {
     // dataTest2 () {
     //   this.cxt.putImageData(this.ImageData, 0, 0)
     // },
+    /* 传入坐标 移除该坐标所在的线段 */
+    removeThisLine (index) {
+      var start = 0
+      var end = 0
+      for (let i = index; i >= 0; i--) {
+        if (this.trace[i].end) {
+          start = i + 1
+          break
+        }
+      }
+      for (let i = index; i < this.trace.length; i++) {
+        if (this.trace[i].end) {
+          end = i
+          break
+        }
+      }
+      this.trace.splice(start, end - start + 1)
+      // console.log(this.trace)
+      this.rePaint()
+    },
+    checkTrace (x, y) {
+      for (var i = 0; i < this.trace.length; i++) {
+        var xAbs = Math.abs(this.trace[i].x - x)
+        var yAbs = Math.abs(this.trace[i].y - y)
+        var x2 = Math.pow(xAbs, 2)
+        var y2 = Math.pow(yAbs, 2)
+        var result = Math.sqrt(x2 + y2)
+        if (result < 5) {
+          return i
+        }
+      }
+      return -1
+    },
+    eraserTrigger () {
+      this.eraserFlag = !this.eraserFlag
+    },
     image2Canvas () {
       var img = new Image()
       // console.log(this.imageToInsert)
@@ -301,21 +346,6 @@ export default {
       }
       this.rePaintTrace()
       // console.log(this.trace)
-      // // 重画之前的轨迹
-      // var branchFlag = true
-      // // 遍历轨迹对象
-      // for (var i = 0; i < this.trace.length; i++) {
-      //   // console.log(this.trace[i])
-      //   if (branchFlag) {
-      //     this.beginAndMove(this.trace[i].x, this.trace[i].y)
-      //     branchFlag = false
-      //     continue
-      //   }
-      //   if (this.trace[i].end) {
-      //     branchFlag = true
-      //   }
-      //   this.draw(this.trace[i].x, this.trace[i].y)
-      // }
     },
     /* 改变笔触颜色 注意要改两种颜色一种是线的颜色 一种时阴影的颜色 */
     colorChange () {
@@ -495,15 +525,17 @@ export default {
     this.canvas.addEventListener(
       'mousedown',
       function (e) {
-        this.traceInput(e.pageX, e.pageY, false) // 记录鼠标开始时坐标
-        this.beginAndMove(e.pageX, e.pageY)
-        this.flag = true // 鼠标移动绘制时的标志量
+        if (!this.eraserFlag) {
+          this.traceInput(e.pageX, e.pageY, false) // 记录鼠标开始时坐标
+          this.beginAndMove(e.pageX, e.pageY)
+          this.flag = true // 鼠标移动绘制时的标志量
+        }
       }.bind(this)
     )
     this.canvas.addEventListener(
       'mousemove',
       function (e) {
-        if (this.flag) {
+        if (!this.eraserFlag && this.flag) {
           this.traceInput(e.pageX, e.pageY, false) // 记录鼠标移动时坐标
           this.draw(e.pageX, e.pageY)
         }
@@ -520,9 +552,30 @@ export default {
     this.canvas.addEventListener(
       'mouseup',
       function (e) {
-        this.traceInput(e.pageX, e.pageY, true) // 记录鼠标结束时坐标
-        this.flag = false // 标志归位
+        if (!this.eraserFlag) {
+          this.traceInput(e.pageX, e.pageY, true) // 记录鼠标结束时坐标
+          this.flag = false // 标志归位
+        }
+
         // console.log(this.trace)
+      }.bind(this)
+    )
+
+    /* 橡皮差 */
+
+    this.canvas.addEventListener(
+      'mousemove',
+      function (e) {
+        if (this.eraserFlag) {
+          // console.log('eraserTrriger')
+          // console.log(this.checkTrace(e.pageX, e.pageY))
+          var index = this.checkTrace(e.pageX, e.pageY)
+          if (index !== -1) {
+            // console.log(index)
+            // console.log(this.trace)
+            this.removeThisLine(index)
+          }
+        }
       }.bind(this)
     )
     /* 检测窗口变化大小 如果发生变化会清除面板和重绘数据 */
