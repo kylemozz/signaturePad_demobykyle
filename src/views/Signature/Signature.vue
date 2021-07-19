@@ -150,15 +150,21 @@ export default {
       var img = new Image()
       // console.log(this.imageToInsert)
       img.src = this.imageToInsert
+      // 异步事件的使用要特别注意
       img.onload = function () {
         this.cxt.drawImage(img, 0, 0)
+        // 重画之前的轨迹
+        if (this.trace.length > 0) {
+          this.rePaintTrace()
+        }
       }.bind(this)
     },
     /* 导入的图片显示在canvas上 */
     drawImageOnCanvas () {
-      this.clearCanvas()
-      this.clearTrace()
+      // this.clearCanvas()
+      // this.clearTrace()
       this.image2Canvas()
+      // console.log(this.trace)
       // var img = new Image()
       // // console.log(this.imageToInsert)
       // img.src = this.imageToInsert
@@ -181,7 +187,7 @@ export default {
     //   console.log(this.trace)
     //   console.log(em)
     // },
-    /* 撤回轨迹的上一步 */
+    /* 撤回轨迹的上一步 切割数组 */
     traceBackWard () {
       if (this.trace.length === 0) {
         alert('当前不存在可撤回轨迹')
@@ -205,7 +211,7 @@ export default {
       // this.findMark()
       // console.log(this.trace)
 
-      this.rePaint()
+      this.rePaint() // 重新绘制之前的轨迹 也是在这一步导致导入的图片消失
     },
     /* 文件导入 */
     fileInput () {
@@ -239,10 +245,7 @@ export default {
     //   window.requestAnimationFrame(this.rePaint)
     // },
     /* 利用轨迹数据重新绘制 */
-    rePaint () {
-      this.clearCanvas() // 重绘首先清空画布
-
-      // console.log(this.trace)
+    rePaintTrace () {
       var branchFlag = true
       // 遍历轨迹对象
       for (var i = 0; i < this.trace.length; i++) {
@@ -257,6 +260,31 @@ export default {
         }
         this.draw(this.trace[i].x, this.trace[i].y)
       }
+    },
+    rePaint () {
+      this.clearCanvas() // 重绘首先清空画布 这一步必须清除画布 因为撤回的原理是把分割后的数组重新绘制 这一步清空数组也导致了之前导入图片的消失
+
+      // 重画之前的图片 如果再这一步加重画图片 会导致之前的轨迹全部消失
+      if (this.image) {
+        this.drawImageOnCanvas()
+      }
+      this.rePaintTrace()
+      // console.log(this.trace)
+      // // 重画之前的轨迹
+      // var branchFlag = true
+      // // 遍历轨迹对象
+      // for (var i = 0; i < this.trace.length; i++) {
+      //   // console.log(this.trace[i])
+      //   if (branchFlag) {
+      //     this.beginAndMove(this.trace[i].x, this.trace[i].y)
+      //     branchFlag = false
+      //     continue
+      //   }
+      //   if (this.trace[i].end) {
+      //     branchFlag = true
+      //   }
+      //   this.draw(this.trace[i].x, this.trace[i].y)
+      // }
     },
     /* 改变笔触颜色 注意要改两种颜色一种是线的颜色 一种时阴影的颜色 */
     colorChange () {
