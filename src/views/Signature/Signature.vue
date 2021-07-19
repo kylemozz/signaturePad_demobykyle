@@ -375,6 +375,7 @@ export default {
     },
     clear () {
       // this.clearTrace()
+      this.image = ''
       this.clearCanvas()
     },
     /* 清除当前canvas的内容 */
