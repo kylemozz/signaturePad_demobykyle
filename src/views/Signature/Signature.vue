@@ -1,7 +1,7 @@
 <template>
   <div class="canvas_container">
     <canvas id="canvas"></canvas>
-    <a-menu :selectable="false" mode="horizontal" class="canvas-menu">
+    <a-menu mode="horizontal" class="canvas-menu">
       <a-menu-item class="menu-item">
         <a-button
           class="menu-btn small-width"
@@ -469,7 +469,7 @@ export default {
       'resize',
       function () {
         // location.reload()
-        alert('window resize')
+        // alert('window resize')
         this.porpertyInit() // 需要重新初始化属性
         this.clearTrace() // 需要清除重绘数据
       }.bind(this)
