@@ -468,6 +468,7 @@ export default {
     window.addEventListener(
       'resize',
       function () {
+        this.windowToCanvas()
         this.porpertyInit() // 需要重新初始化属性
         this.clearTrace() // 需要清除重绘数据
       }.bind(this)
