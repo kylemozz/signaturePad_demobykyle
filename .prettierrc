@@ -1,0 +1,4 @@
+{
+    "semi": false, // 每行不加分号
+    "singleQuote": false, // 使用单引号
+}
