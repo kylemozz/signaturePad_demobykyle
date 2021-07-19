@@ -304,9 +304,9 @@ export default {
       this.lineColor = '#000'
       this.canvasBgColor = '#fff'
       // 这里设置宽高等于可见宽高很重要
-      // this.canvas.width = this.canvas.clientWidth
-      // this.canvas.height = this.canvas.clientHeight
-      this.windowToCanvas() // 强制与窗口化大小保持一致
+      this.canvas.width = this.canvas.clientWidth
+      this.canvas.height = this.canvas.clientHeight
+      // this.windowToCanvas() // 强制与窗口化大小保持一致
       this.cxt = this.canvas.getContext('2d')
       this.cxt.fillStyle = this.canvasBgColor // 填充颜色设定
       this.cxt.fillRect(0, 0, this.canvas.width, this.canvas.height) // 画一个矩形 大小占满canvas 当做背景
@@ -468,7 +468,8 @@ export default {
     window.addEventListener(
       'resize',
       function () {
-        this.windowToCanvas()
+        // location.reload()
+        alert('window resize')
         this.porpertyInit() // 需要重新初始化属性
         this.clearTrace() // 需要清除重绘数据
       }.bind(this)
