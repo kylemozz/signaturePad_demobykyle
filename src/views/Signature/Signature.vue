@@ -202,7 +202,7 @@ export default {
         len.push(index[j] - index[j - 1])
       }
 
-      console.log(len)
+      // console.log(len)
       // var count = 0
       var decay = (this.lineWidth - 1) / len[0] // 宽度衰减值
       // console.log(decay)
@@ -226,7 +226,7 @@ export default {
           len.shift()
           decay = (this.lineWidth - 1) / len[0]
           // count += 1
-          console.log(decay)
+          // console.log(decay)
         }
       }
       // console.log(count)
@@ -623,6 +623,7 @@ export default {
             true
           ) // 记录鼠标结束时坐标
           this.close()
+          this.penShape() // 抬笔添加笔锋
         }
       }.bind(this)
     )
