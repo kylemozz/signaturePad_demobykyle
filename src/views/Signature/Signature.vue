@@ -92,6 +92,11 @@
           >橡皮擦</a-button
         >
       </a-menu-item>
+      <a-menu-item class="menu-item">
+        <a-button class="menu-btn small-width" @click="penShape()"
+          >笔锋</a-button
+        >
+      </a-menu-item>
       <!-- <a-menu-item class="menu-item">
         <a-button class="menu-btn small-width" @click="findMark()"
           >断点</a-button
@@ -179,6 +184,49 @@ export default {
     // dataTest2 () {
     //   this.cxt.putImageData(this.ImageData, 0, 0)
     // },
+    /* 笔锋测试 核心思路为线的宽度逐渐减少 */
+    penShape () {
+      var index = [] // 每条线段的终点坐标
+      for (var j = 0; j < this.trace.length; j++) {
+        if (this.trace[j].end) {
+          index.push(j)
+        }
+      }
+      console.log(index)
+      // 计算每段线段的长度
+      for (let j = 1; j < index.length; j++) {
+        index[j] = index[j] - index[j - 1]
+      }
+      index[0] += 1
+      console.log(index)
+      // var count = 0
+      var decay = (this.lineWidth - 0.3) / index[0] // 宽度衰减值
+      // console.log(decay)
+      var branchFlag = true
+      // 遍历轨迹对象
+      for (var i = 0; i < this.trace.length; i++) {
+        // console.log(this.trace[i])
+        if (branchFlag) {
+          this.beginAndMove(this.trace[i].x, this.trace[i].y)
+          branchFlag = false
+          continue
+        }
+
+        // 逐渐改变线的宽度
+        this.cxt.lineWidth -= decay
+        // console.log(this.cxt.lineWidth)
+        this.draw(this.trace[i].x, this.trace[i].y)
+        if (this.trace[i].end) {
+          branchFlag = true
+          this.cxt.lineWidth = this.lineWidth
+          index.shift()
+          decay = (this.lineWidth - 0.3) / index[0]
+          // count += 1
+          console.log(decay)
+        }
+      }
+      // console.log(count)
+    },
     /* 遍历轨迹数组 并根据检测结果擦除 */
     eraserTheLine () {
       for (var i = 0; i < this.trace.length - 1; i++) {
@@ -236,7 +284,6 @@ export default {
       z = (x2 - x3) * (y4 - y3) - (x4 - x3) * (y2 - y3)
       return u * v <= 0.00000001 && w * z <= 0.00000001
     },
-
     /* 传入坐标 移除该坐标所在的线段 */
     removeThisLine (index) {
       var start = 0
@@ -256,19 +303,6 @@ export default {
       this.trace.splice(start, end - start + 1)
       // console.log(this.trace)
       this.rePaint()
-    },
-    checkTrace (x, y) {
-      for (var i = 0; i < this.trace.length; i++) {
-        var xAbs = Math.abs(this.trace[i].x - x)
-        var yAbs = Math.abs(this.trace[i].y - y)
-        var x2 = Math.pow(xAbs, 2)
-        var y2 = Math.pow(yAbs, 2)
-        var result = Math.sqrt(x2 + y2)
-        if (result < 5) {
-          return i
-        }
-      }
-      return -1
     },
     eraserTrigger () {
       this.eraserFlag = !this.eraserFlag
@@ -398,6 +432,10 @@ export default {
         if (this.trace[i].end) {
           branchFlag = true
         }
+        /* 最后六个点改变lineWidth? */
+        // if (this.trace.length - i === 10) {
+        //   this.cxt.lineWidth -= 2
+        // }
         this.draw(this.trace[i].x, this.trace[i].y)
       }
     },
@@ -655,7 +693,7 @@ export default {
     this.canvas.addEventListener(
       'touchend',
       function (e) {
-        console.log(this.eraserFlag)
+        // console.log(this.eraserFlag)
         if (this.eraserFlag) {
           this.eraserTraceInput(
             e.changedTouches[0].pageX,
@@ -686,7 +724,7 @@ export default {
     this.canvas.addEventListener(
       'mouseup',
       function (e) {
-        console.log(this.eraserFlag)
+        // console.log(this.eraserFlag)
         if (this.eraserFlag) {
           this.eraserTraceInput(e.pageX, e.pageY)
           // console.log(this.eraserTrace)
