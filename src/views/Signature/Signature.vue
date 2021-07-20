@@ -203,7 +203,7 @@ export default {
 
       console.log(len)
       // var count = 0
-      var decay = (this.lineWidth - 0) / len[0] // 宽度衰减值
+      var decay = (this.lineWidth - 1) / len[0] // 宽度衰减值
       // console.log(decay)
       var branchFlag = true
       // 遍历轨迹对象
@@ -223,7 +223,7 @@ export default {
           branchFlag = true
           this.cxt.lineWidth = this.lineWidth
           len.shift()
-          decay = (this.lineWidth - 0) / len[0]
+          decay = (this.lineWidth - 1) / len[0]
           // count += 1
           console.log(decay)
         }
