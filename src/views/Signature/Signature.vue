@@ -187,20 +187,23 @@ export default {
     /* 笔锋测试 核心思路为线的宽度逐渐减少 */
     penShape () {
       var index = [] // 每条线段的终点坐标
+      var len = []
       for (var j = 0; j < this.trace.length; j++) {
         if (this.trace[j].end) {
           index.push(j)
         }
       }
-      console.log(index)
+      // console.log(index)
       // 计算每段线段的长度
+
+      len[0] = index[0] + 1
       for (let j = 1; j < index.length; j++) {
-        index[j] = index[j] - index[j - 1]
+        len.push(index[j] - index[j - 1])
       }
-      index[0] += 1
-      console.log(index)
+
+      console.log(len)
       // var count = 0
-      var decay = (this.lineWidth - 0.3) / index[0] // 宽度衰减值
+      var decay = (this.lineWidth - 0) / len[0] // 宽度衰减值
       // console.log(decay)
       var branchFlag = true
       // 遍历轨迹对象
@@ -219,8 +222,8 @@ export default {
         if (this.trace[i].end) {
           branchFlag = true
           this.cxt.lineWidth = this.lineWidth
-          index.shift()
-          decay = (this.lineWidth - 0.3) / index[0]
+          len.shift()
+          decay = (this.lineWidth - 0) / len[0]
           // count += 1
           console.log(decay)
         }
