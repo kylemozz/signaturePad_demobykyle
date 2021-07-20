@@ -670,6 +670,7 @@ export default {
         if (!this.eraserFlag) {
           this.traceInput(e.pageX, e.pageY, true) // 记录鼠标结束时坐标
           this.flag = false // 标志归位
+          this.penShape() // 抬笔添加笔锋
         }
 
         // console.log(this.trace)
