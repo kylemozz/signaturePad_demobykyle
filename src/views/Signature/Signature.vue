@@ -186,6 +186,7 @@ export default {
     // },
     /* 笔锋测试 核心思路为线的宽度逐渐减少 */
     penShape () {
+      this.clearCanvas()
       var index = [] // 每条线段的终点坐标
       var len = []
       for (var j = 0; j < this.trace.length; j++) {
