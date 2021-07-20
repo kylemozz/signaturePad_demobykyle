@@ -152,7 +152,8 @@ export default {
       imageToInsert: '', // 要导入canvas的图片
       newTrace: '', // 导入的新轨迹
       // ImageData: ''
-      eraserFlag: false
+      eraserFlag: false, // 橡皮擦功能启动标志位
+      eraserTrace: [] // 橡皮擦轨迹
     }
   },
   watch: {
@@ -178,6 +179,64 @@ export default {
     // dataTest2 () {
     //   this.cxt.putImageData(this.ImageData, 0, 0)
     // },
+    /* 遍历轨迹数组 并根据检测结果擦除 */
+    eraserTheLine () {
+      for (var i = 0; i < this.trace.length - 1; i++) {
+        // 第一个点不能是终点 以防错误连线检测
+        if (!this.trace[i].end) {
+          // 相交检测
+          var x1 = this.eraserTrace[0].x
+          var y1 = this.eraserTrace[0].y
+          var x2 = this.eraserTrace[1].x
+          var y2 = this.eraserTrace[1].y
+          var x3 = this.trace[i].x
+          var y3 = this.trace[i].y
+          var x4 = this.trace[i + 1].x
+          var y4 = this.trace[i + 1].y
+          var res = this.judgeIntersect(x1, y1, x2, y2, x3, y3, x4, y4)
+          if (res) {
+            this.removeThisLine(i)
+          }
+        }
+      }
+    },
+    /* 四点两两连线线段相交检测 注意传入参数的顺序 */
+    judgeIntersect (x1, y1, x2, y2, x3, y3, x4, y4) {
+      // 快速排斥
+      // 两个线段为对角线组成的矩形，如果两个矩形没有重叠的部分，那么两条线段一定不相交（但是重叠的矩形也有可能不相交）
+
+      // 1. 线段ab的低点低于cd的最高点（可能重合）
+      var conditon1 = Math.min(y1, y2) <= Math.max(y3, y4)
+      // 2. cd最左端小于ab最右端
+      var condition2 = Math.min(x3, x4) < Math.max(x1, x2)
+      // 3. cd的最低点低于ab的最高点（加上条件1，两线段在竖直方向上重合）
+      var condition3 = Math.min(y3, y4) < Math.max(y1, y2)
+      // 4. ab的最左端小于cd的最右端
+      var condition4 = Math.min(x1, x2) < Math.max(x3, x4)
+
+      // 综合以上4个条件 矩形是重合的（也包括矩形包含的情况） 这一步是判断那些绝对不重合的矩阵 即绝对不相交
+      if (!(conditon1 && condition2 && condition3 && condition4)) {
+        return false
+      }
+
+      // 剩下的用跨立实验判断
+      // 如果两条线段相交 必然跨立，以一条线段为标准，另一条线段的两端点一定在这条线段的两端
+      // 即ab两点在线段cd的两端 cd两点在线段ab的两端
+      // (ACxAB)*(ABxAD) <= 0
+      // AC AB 叉乘<=0
+      // AB AD 叉乘<=0
+      var u, v, w, z
+
+      // AC AB 叉乘 详见向量公式以及叉乘公式
+      u = (x3 - x1) * (y2 - y1) - (x2 - x1) * (y3 - y1)
+      // AD AB 叉乘
+      v = (x4 - x1) * (y2 - y1) - (x2 - x1) * (y4 - y1)
+      // 以下同理 即对于另一条线段也要判断是否在两侧
+      w = (x1 - x3) * (y4 - y3) - (x4 - x3) * (y1 - y3)
+      z = (x2 - x3) * (y4 - y3) - (x4 - x3) * (y2 - y3)
+      return u * v <= 0.00000001 && w * z <= 0.00000001
+    },
+
     /* 传入坐标 移除该坐标所在的线段 */
     removeThisLine (index) {
       var start = 0
@@ -213,6 +272,7 @@ export default {
     },
     eraserTrigger () {
       this.eraserFlag = !this.eraserFlag
+      this.eraserTrace = [] // 清空上一次的橡皮擦轨迹数组
     },
     image2Canvas () {
       var img = new Image()
@@ -302,6 +362,10 @@ export default {
       var blob = new Blob([content]) // 字符内容变为blob地址
       jsonLink.href = URL.createObjectURL(blob)
       jsonLink.click()
+    },
+    /* 橡皮擦输入轨迹 */
+    eraserTraceInput (x, y) {
+      this.eraserTrace.push({ x: x, y: y })
     },
     /* 输入轨迹 */
     traceInput (x, y, flag) {
@@ -570,41 +634,68 @@ export default {
       }.bind(this)
     )
 
-    /* 橡皮差 */
+    /* 移动端橡皮擦 */
     this.canvas.addEventListener(
-      'touchmove',
+      'touchstart',
       function (e) {
         if (this.eraserFlag) {
-          // console.log('eraserTrriger')
-          // console.log(this.checkTrace(e.pageX, e.pageY))
-          var index = this.checkTrace(
+          if (this.eraserTrace.length === 2) {
+            // 清除上一次的轨迹
+            this.eraserTrace = []
+          }
+          this.eraserTraceInput(
             e.changedTouches[0].pageX,
             e.changedTouches[0].pageY
           )
-          if (index !== -1) {
-            // console.log(index)
-            // console.log(this.trace)
-            this.removeThisLine(index)
-          }
+          // console.log(this.eraserTrace)
         }
       }.bind(this)
     )
 
     this.canvas.addEventListener(
-      'mousemove',
+      'touchend',
       function (e) {
+        console.log(this.eraserFlag)
         if (this.eraserFlag) {
-          // console.log('eraserTrriger')
-          // console.log(this.checkTrace(e.pageX, e.pageY))
-          var index = this.checkTrace(e.pageX, e.pageY)
-          if (index !== -1) {
-            // console.log(index)
-            // console.log(this.trace)
-            this.removeThisLine(index)
-          }
+          this.eraserTraceInput(
+            e.changedTouches[0].pageX,
+            e.changedTouches[0].pageY
+          )
+          // console.log(this.eraserTrace)
+          // 相交检测并根据检测结果擦除
+          this.eraserTheLine()
         }
       }.bind(this)
     )
+
+    /* PC端橡皮擦 */
+    this.canvas.addEventListener(
+      'mousedown',
+      function (e) {
+        if (this.eraserFlag) {
+          if (this.eraserTrace.length === 2) {
+            // 清除上一次的轨迹
+            this.eraserTrace = []
+          }
+          this.eraserTraceInput(e.pageX, e.pageY)
+          // console.log(this.eraserTrace)
+        }
+      }.bind(this)
+    )
+
+    this.canvas.addEventListener(
+      'mouseup',
+      function (e) {
+        console.log(this.eraserFlag)
+        if (this.eraserFlag) {
+          this.eraserTraceInput(e.pageX, e.pageY)
+          // console.log(this.eraserTrace)
+          // 相交检测并根据检测结果擦除
+          this.eraserTheLine()
+        }
+      }.bind(this)
+    )
+
     /* 检测窗口变化大小 如果发生变化会清除面板和重绘数据 */
     window.addEventListener(
       'resize',
