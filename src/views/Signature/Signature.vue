@@ -425,10 +425,6 @@ export default {
     //   console.log(this.canvas.width, this.canvas.height)
     //   console.log(window.innerWidth, window.innerHeight)
     // },
-    /* 动画 */
-    // animate () {
-    //   window.requestAnimationFrame(this.rePaint)
-    // },
     /* 利用轨迹数据重新绘制 */
     rePaintTrace () {
       var branchFlag = true
@@ -443,10 +439,6 @@ export default {
         if (this.trace[i].end) {
           branchFlag = true
         }
-        /* 最后六个点改变lineWidth? */
-        // if (this.trace.length - i === 10) {
-        //   this.cxt.lineWidth -= 2
-        // }
         this.draw(this.trace[i].x, this.trace[i].y)
       }
     },
@@ -466,7 +458,7 @@ export default {
       this.cxt.shadowColor = this.lineColor
     },
     /* 改变笔触粗细 注意笔触属性接受值为number */
-    penSizeChange (e) {
+    penSizeChange () {
       // console.log(e) // e.data
       // console.log(typeof this.lineWidth) //用户输入均为字符串
       this.lineWidth = Number(this.lineWidth)
@@ -532,7 +524,7 @@ export default {
     },
     /* 闭合路径 PC请勿使用？ */
     close () {
-      this.cxt.closePath()
+      // this.cxt.closePath()
     },
     /* 下载签名并保存成图片 应该接收参数决定保存成图片的类型 */
     download () {
@@ -562,7 +554,7 @@ export default {
       this.cxt.clearRect(0, 0, this.canvas.width, this.canvas.height)
       this.cxt.fillRect(0, 0, this.canvas.width, this.canvas.height) // 再绘制一次背景因为会连背景也清除
     },
-    /* 清除当前轨迹数据 也会同时清除画布 */
+    /* 清除当前轨迹数据 */
     clearTrace () {
       this.trace.splice(0, this.trace.length)
       this.imageToInsert = ''
@@ -629,12 +621,15 @@ export default {
       'touchend',
       function (e) {
         if (!this.eraserFlag) {
-          this.traceInput(
-            e.changedTouches[0].pageX,
-            e.changedTouches[0].pageY,
-            true
-          ) // 记录鼠标结束时坐标
-          this.close()
+          if (this.trace.length > 0) {
+            this.traceInput(
+              e.changedTouches[0].pageX,
+              e.changedTouches[0].pageY,
+              true
+            ) // 记录鼠标结束时坐标
+          }
+
+          // this.close()
           // this.penShape() // 抬笔添加笔锋
         }
       }.bind(this)
@@ -681,7 +676,9 @@ export default {
       'mouseup',
       function (e) {
         if (!this.eraserFlag) {
-          this.traceInput(e.pageX, e.pageY, true) // 记录鼠标结束时坐标
+          if (this.trace.length > 0) {
+            this.traceInput(e.pageX, e.pageY, true) // 记录鼠标结束时坐标
+          }
           this.flag = false // 标志归位
           // this.penShape() // 抬笔添加笔锋
         }
