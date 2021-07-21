@@ -45,7 +45,7 @@
         <a-button
           @click="rePaint()"
           class="menu-btn small-width"
-          :type="btnHighlight ? 'primary' : ''"
+          :type="btnHighlight ||imgFlag? 'primary' : ''"
           >重绘</a-button
         >
       </a-menu-item>
@@ -53,7 +53,7 @@
         <a-button
           @click="clearTrace()"
           class="menu-btn small-width"
-          :type="btnHighlight ? 'primary' : ''"
+          :type="btnHighlight||imgFlag ? 'primary' : ''"
           >清除重绘</a-button
         >
       </a-menu-item>
@@ -150,6 +150,7 @@ export default {
       trace: [], // 轨迹变量数据
       flag: '', // 鼠标移动时的标志量
       btnHighlight: false, // 按钮高亮标志量
+      imgFlag: false, // 图片功能关联的重绘和消除重绘高亮
       file: '', // 传入的文件
       fileInputBtn: '', // 文件选择输入按钮
       imageInputBtn: '', // 图片选择输入按扭
@@ -169,6 +170,13 @@ export default {
       } else {
         this.btnHighlight = false
       }
+    },
+    imageToInsert () {
+      if (this.imageToInsert) {
+        this.imgFlag = true
+      } else {
+        this.imgFlag = false
+      }
     }
   },
   methods: {
@@ -185,8 +193,7 @@ export default {
     //   this.cxt.putImageData(this.ImageData, 0, 0)
     // },
     /* 笔锋测试 核心思路为线的宽度逐渐减少 */
-    penShape () {
-      this.clearCanvas()
+    penShapeCompute () {
       var index = [] // 每条线段的终点坐标
       var len = []
       for (var j = 0; j < this.trace.length; j++) {
@@ -230,6 +237,11 @@ export default {
         }
       }
       // console.log(count)
+    },
+    penShape () {
+      this.clearCanvas()
+      this.penShapeCompute()
+      this.image2Canvas(true)
     },
     /* 遍历轨迹数组 并根据检测结果擦除 */
     eraserTheLine () {
@@ -312,7 +324,7 @@ export default {
       this.eraserFlag = !this.eraserFlag
       this.eraserTrace = [] // 清空上一次的橡皮擦轨迹数组
     },
-    image2Canvas () {
+    image2Canvas (penFlag) {
       var img = new Image()
       // console.log(this.imageToInsert)
       img.src = this.imageToInsert
@@ -320,7 +332,9 @@ export default {
       img.onload = function () {
         this.cxt.drawImage(img, 0, 0)
         // 重画之前的轨迹
-        if (this.trace.length > 0) {
+        if (this.trace.length > 0 && penFlag) {
+          this.penShapeCompute()
+        } else {
           this.rePaintTrace()
         }
       }.bind(this)
@@ -330,13 +344,6 @@ export default {
       // this.clearCanvas()
       // this.clearTrace()
       this.image2Canvas()
-      // console.log(this.trace)
-      // var img = new Image()
-      // // console.log(this.imageToInsert)
-      // img.src = this.imageToInsert
-      // img.onload = function () {
-      //   this.cxt.drawImage(img, 0, 0)
-      // }.bind(this)
     },
     /* 导入图片 */
     imageInput () {
@@ -447,7 +454,7 @@ export default {
       this.clearCanvas() // 重绘首先清空画布 这一步必须清除画布 因为撤回的原理是把分割后的数组重新绘制 这一步清空数组也导致了之前导入图片的消失
 
       // 重画之前的图片 如果再这一步加重画图片 会导致之前的轨迹全部消失
-      if (this.image) {
+      if (this.imageToInsert) {
         this.drawImageOnCanvas()
       }
       this.rePaintTrace()
@@ -545,6 +552,10 @@ export default {
       // 把导入的图片和画布一起清除
       // this.image = ''
       this.clearCanvas()
+      this.image = ''
+      // this.imageToInsert = ''
+      this.file = ''
+      this.newTrace = []
     },
     /* 清除当前canvas的内容 */
     clearCanvas () {
@@ -554,6 +565,7 @@ export default {
     /* 清除当前轨迹数据 也会同时清除画布 */
     clearTrace () {
       this.trace.splice(0, this.trace.length)
+      this.imageToInsert = ''
       // this.trace = []
       // this.clearCanvas()
     },
@@ -623,7 +635,7 @@ export default {
             true
           ) // 记录鼠标结束时坐标
           this.close()
-          this.penShape() // 抬笔添加笔锋
+          // this.penShape() // 抬笔添加笔锋
         }
       }.bind(this)
     )
@@ -671,7 +683,7 @@ export default {
         if (!this.eraserFlag) {
           this.traceInput(e.pageX, e.pageY, true) // 记录鼠标结束时坐标
           this.flag = false // 标志归位
-          this.penShape() // 抬笔添加笔锋
+          // this.penShape() // 抬笔添加笔锋
         }
 
         // console.log(this.trace)
@@ -765,6 +777,12 @@ export default {
         }.bind(this)
       }.bind(this)
     )
+    this.fileInputBtn.addEventListener(
+      'click',
+      function (e) {
+        this.value = ''
+      }
+    )
     /* 图片导入 */
     this.imageInputBtn.addEventListener(
       'change',
@@ -778,6 +796,12 @@ export default {
           // console.log(this.imageToInsert)
         }.bind(this)
       }.bind(this)
+    )
+    this.imageInputBtn.addEventListener(
+      'click',
+      function (e) {
+        this.value = ''
+      }
     )
   }
 }
