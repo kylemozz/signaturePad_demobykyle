@@ -7,6 +7,14 @@
       :selectable="false"
       :multiple="true"
     >
+      <a-menu-item class="menu-item">
+        <span>粗细：</span>
+        <a-input
+          v-model="width"
+          @blur="penSizeChange"
+          class="pen-width-input"
+        />
+      </a-menu-item>
       <a-menu-item key="1" class="menu-item">
         <a-button
           class="menu-btn small-width"
@@ -38,14 +46,7 @@
           </a-select-option> -->
         </a-select>
       </a-menu-item>
-      <a-menu-item class="menu-item">
-        <span>粗细：</span>
-        <a-input
-          v-model="width"
-          @blur="penSizeChange"
-          class="pen-width-input"
-        />
-      </a-menu-item>
+
       <a-menu-item key="3" class="menu-item">
         <a-button class="menu-btn small-width" id="saveCanvas" @click="clear()"
           ><a-icon class="small-margin-right" type="delete" /><span
