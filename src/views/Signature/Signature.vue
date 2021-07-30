@@ -1,8 +1,13 @@
 <template>
   <div class="canvas_container">
     <canvas id="canvas"></canvas>
-    <a-menu mode="horizontal" class="canvas-menu">
-      <a-menu-item class="menu-item">
+    <a-menu
+      mode="horizontal"
+      class="canvas-menu"
+      :selectable="false"
+      :multiple="true"
+    >
+      <a-menu-item key="1" class="menu-item">
         <a-button
           class="menu-btn small-width"
           id="clearCanvas"
@@ -13,7 +18,7 @@
           ></a-button
         >
       </a-menu-item>
-      <a-menu-item class="menu-item">
+      <a-menu-item key="2" class="menu-item">
         格式：
         <a-select
           label-in-value
@@ -34,6 +39,14 @@
         </a-select>
       </a-menu-item>
       <a-menu-item class="menu-item">
+        <span>粗细：</span>
+        <a-input
+          v-model="width"
+          @blur="penSizeChange"
+          class="pen-width-input"
+        />
+      </a-menu-item>
+      <a-menu-item key="3" class="menu-item">
         <a-button class="menu-btn small-width" id="saveCanvas" @click="clear()"
           ><a-icon class="small-margin-right" type="delete" /><span
             class="btn-text"
@@ -41,23 +54,23 @@
           ></a-button
         >
       </a-menu-item>
-      <a-menu-item class="menu-item">
+      <a-menu-item key="4" class="menu-item">
         <a-button
           @click="rePaint()"
           class="menu-btn small-width"
-          :type="btnHighlight ||imgFlag? 'primary' : ''"
+          :type="btnHighlight || imgFlag ? 'primary' : ''"
           >重绘</a-button
         >
       </a-menu-item>
-      <a-menu-item class="menu-item">
+      <a-menu-item key="5" class="menu-item">
         <a-button
           @click="clearTrace()"
           class="menu-btn small-width"
-          :type="btnHighlight||imgFlag ? 'primary' : ''"
+          :type="btnHighlight || imgFlag ? 'primary' : ''"
           >清除重绘</a-button
         >
       </a-menu-item>
-      <a-menu-item class="menu-item">
+      <a-menu-item key="6" class="menu-item">
         <a-button
           class="menu-btn small-width"
           @click="saveTraceAsJSON()"
@@ -65,26 +78,26 @@
           >导出重绘</a-button
         >
       </a-menu-item>
-      <a-menu-item class="menu-item">
+      <a-menu-item key="7" class="menu-item">
         <a-button class="menu-btn small-width" @click="fileInput()"
           >导入重绘</a-button
         >
         {{ file.length > 0 ? file[0].name : "none" }}
         <input id="fileInputBtn" type="file" multiple />
       </a-menu-item>
-      <a-menu-item class="menu-item">
+      <a-menu-item key="8" class="menu-item">
         <a-button class="menu-btn small-width" @click="imageInput()"
           >导入图片</a-button
         >
         {{ image.length > 0 ? image[0].name : "none" }}
         <input style="display:none;" id="imageInputBtn" type="file" multiple />
       </a-menu-item>
-      <a-menu-item class="menu-item">
+      <a-menu-item key="9" class="menu-item">
         <a-button class="menu-btn small-width" @click="traceBackWard()"
           >撤回</a-button
         >
       </a-menu-item>
-      <a-menu-item class="menu-item">
+      <a-menu-item key="10" class="menu-item">
         <a-button
           :type="eraserFlag ? 'primary' : ''"
           class="menu-btn small-width"
@@ -92,7 +105,7 @@
           >橡皮擦</a-button
         >
       </a-menu-item>
-      <a-menu-item class="menu-item">
+      <a-menu-item key="11" class="menu-item">
         <a-button class="menu-btn small-width" @click="penShape()"
           >笔锋</a-button
         >
@@ -117,20 +130,26 @@
           >导入测试</a-button
         >
       </a-menu-item> -->
-      <a-menu-item class="menu-item">
-        <span>粗细：</span
-        ><a-input
-          v-model="lineWidth"
-          @blur="penSizeChange"
-          class="pen-width-input"
-      /></a-menu-item>
+      <!-- <a-sub-menu> -->
 
-      <a-menu-item class="menu-item">
+      <!-- <a-menu-item-group key="12" class="menu-item">
+          <a-menu-item>
+             <span>粗细：</span>
+            <a-input
+              @click="showMenu"
+              v-model="lineWidth"
+              @blur="penSizeChange"
+              class="pen-width-input"
+            />
+          </a-menu-item>
+        </a-menu-item-group> -->
+
+      <a-menu-item key="13" class="menu-item extra-show-item">
         <span>颜色：</span>
         <colorPicker
           @change="colorChange"
           class="colorPicker"
-          v-model="lineColor"
+          v-model="color"
         />
       </a-menu-item>
     </a-menu>
@@ -139,14 +158,39 @@
 
 <script>
 export default {
+  // 暴露的参数
+  props: {
+    lineWidth: {
+      // 线条宽度 默认为5
+      type: Number,
+      default: 5
+    },
+    lineColor: {
+      // 线条颜色 默认黑色
+      type: String,
+      default: '#000'
+    },
+    canvasBgColor: {
+      // 绘画框背景颜色
+      type: String,
+      default: '#fff'
+    },
+    imageType: {
+      // 默认的图片类型
+      type: String,
+      default: 'jpg'
+    }
+  },
   data () {
     return {
+      openKeys2: [],
+      openKeys: [],
       canvas: '', // canvas画布
-      lineWidth: '', // 线条宽度 默认为5
-      lineColor: '', // 线条颜色
-      canvasBgColor: '', // 绘画框背景颜色
+      // lineWidth: '', // 线条宽度 默认为5
+      // lineColor: '', // 线条颜色
+      // canvasBgColor: '', // 绘画框背景颜色
+      // imageType: 'jpg', // 将要保存的图片类型 默认jpg
       cxt: '', // canvas的context,
-      imageType: 'jpg', // 将要保存的图片类型 默认jpg
       trace: [], // 轨迹变量数据
       flag: '', // 鼠标移动时的标志量
       btnHighlight: false, // 按钮高亮标志量
@@ -159,7 +203,11 @@ export default {
       newTrace: '', // 导入的新轨迹
       // ImageData: ''
       eraserFlag: false, // 橡皮擦功能启动标志位
-      eraserTrace: [] // 橡皮擦轨迹
+      eraserTrace: [], // 橡皮擦轨迹
+      minusX: '', // 移动端画布x轴偏移值
+      minusY: '', // 移动端画布y轴偏移值
+      color: this.lineColor,
+      width: this.lineWidth
     }
   },
   watch: {
@@ -192,6 +240,42 @@ export default {
     // dataTest2 () {
     //   this.cxt.putImageData(this.ImageData, 0, 0)
     // },
+    showMenu () {
+      this.openKeys = this.openKeys2
+    },
+    openChange () {
+      this.openKeys2 = this.openKeys
+      console.log(this.openKeys)
+    },
+    /* 外部图片传入 */
+    injectImage (image) {
+      console.log(image)
+      this.imageToInsert = image
+      this.drawImageOnCanvas()
+    },
+    /* 外部JSON传入 */
+    injectJSON (json) {
+      console.log(json)
+      this.newTrace = JSON.parse(json)
+      this.trace = this.trace.concat(this.newTrace)
+    },
+    /* 计算移动端偏移值 */
+    mobileCompute () {
+      this.minusX = this.canvas.getBoundingClientRect().x
+      this.minusY = this.canvas.getBoundingClientRect().y
+    },
+    /* 判断浏览器是pc端还是移动端 */
+    isMobile () {
+      if (
+        window.navigator.userAgent.match(
+          /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i
+        )
+      ) {
+        return true // 移动端
+      } else {
+        return false // PC端
+      }
+    },
     /* 笔锋测试 核心思路为线的宽度逐渐减少 */
     penShapeCompute () {
       var index = [] // 每条线段的终点坐标
@@ -407,6 +491,7 @@ export default {
       var blob = new Blob([content]) // 字符内容变为blob地址
       jsonLink.href = URL.createObjectURL(blob)
       jsonLink.click()
+      this.$emit('uploadTraceJSONToFather', content)
     },
     /* 橡皮擦输入轨迹 */
     eraserTraceInput (x, y) {
@@ -451,25 +536,26 @@ export default {
       }
       this.rePaintTrace()
       // console.log(this.trace)
+      // console.log(this.trace)
     },
     /* 改变笔触颜色 注意要改两种颜色一种是线的颜色 一种时阴影的颜色 */
     colorChange () {
-      this.cxt.strokeStyle = this.lineColor
-      this.cxt.shadowColor = this.lineColor
+      this.cxt.strokeStyle = this.color
+      this.cxt.shadowColor = this.color
     },
     /* 改变笔触粗细 注意笔触属性接受值为number */
     penSizeChange () {
       // console.log(e) // e.data
       // console.log(typeof this.lineWidth) //用户输入均为字符串
-      this.lineWidth = Number(this.lineWidth)
-      if (this.lineWidth <= 0 || this.lineWidth > 10 || isNaN(this.lineWidth)) {
+      let lineWidth = Number(this.width)
+      if (lineWidth <= 0 || lineWidth > 10 || isNaN(lineWidth)) {
         // 范围判定 只接受1-10
         console.log('请输入1-10以内的数值')
-        this.lineWidth = 5 // 恢复原值
-        this.cxt.lineWidth = this.lineWidth
+        lineWidth = 5 // 恢复原值
+        this.cxt.lineWidth = lineWidth
         return
       }
-      this.cxt.lineWidth = this.lineWidth // 更改canvas设置
+      this.cxt.lineWidth = lineWidth // 更改canvas设置
     },
     /* 改变保存图片类型 */
     imgTypeChange (value) {
@@ -494,9 +580,6 @@ export default {
     },
     /* 属性初始化 */
     porpertyInit () {
-      this.lineWidth = 5
-      this.lineColor = '#000'
-      this.canvasBgColor = '#fff'
       // 这里设置宽高等于可见宽高很重要
       this.canvas.width = this.canvas.clientWidth
       this.canvas.height = this.canvas.clientHeight
@@ -508,9 +591,9 @@ export default {
       this.cxt.lineWidth = this.lineWidth // 线条粗细设定
       this.cxt.lineCap = 'round' // 线条末端设定 为圆形
       this.cxt.lineJoin = 'round' // 线条交汇处设定 为圆形边角
-      // 利用阴影 消除锯齿
+      // 利用阴影 消除锯齿 注意颜色与线条颜色保持一致
       this.cxt.shadowBlur = 1
-      this.cxt.shadowColor = '#000'
+      this.cxt.shadowColor = this.lineColor
     },
     /* 创建路径与移动触点 */
     beginAndMove (x, y) {
@@ -538,6 +621,7 @@ export default {
       downLoadLink.href = img
       downLoadLink.download = 'mySignature'
       downLoadLink.click() // 触发点击事件进行下载
+      this.$emit('uploadImageToFather', img)
     },
     clear () {
       // this.clearTrace()
@@ -572,182 +656,204 @@ export default {
     this.getDOMEl() // 获取DOM元素
     this.canvasSupTest() // canvas可用性测试
     this.porpertyInit() // 初始化属性
-
-    /*
+    this.mobileCompute() // 计算移动端偏移值
+    // 判断pc端还是移动端
+    if (this.isMobile()) {
+      /*
       移动端  回调函数使用bind传入this
     */
-    // 开始绘制 touchstart 手指触摸时触发
-    this.canvas.addEventListener(
-      'touchstart',
-      function (e) {
-        // console.log(e)
-        // console.log(e.changedTouches[0].pageX,event.changedTouches[0].pageY)
-        /*
+      // 开始绘制 touchstart 手指触摸时触发
+      this.canvas.addEventListener(
+        'touchstart',
+
+        function (e) {
+          // console.log(e)
+          // console.log(e.changedTouches[0].pageX,event.changedTouches[0].pageY)
+          /*
         e.changedTouches[0].pageX 触点的X坐标
         e.changedTouches[0].pageY 触点的Y坐标
         */
-        if (!this.eraserFlag) {
-          this.beginAndMove(
-            e.changedTouches[0].pageX,
-            e.changedTouches[0].pageY
-          )
-          this.traceInput(
-            e.changedTouches[0].pageX,
-            e.changedTouches[0].pageY,
-            false
-          ) // 记录鼠标开始时坐标
-        }
-      }.bind(this)
-    )
-
-    // 绘制中 touchmove 当手指在屏幕上滑动的时候连续地触发 思路为连续触发lineTo事件
-    this.canvas.addEventListener(
-      'touchmove',
-      function (e) {
-        if (!this.eraserFlag) {
-          // console.log(e.changedTouches[0].pageX,event.changedTouches[0].pageY)
-          this.traceInput(
-            e.changedTouches[0].pageX,
-            e.changedTouches[0].pageY,
-            false
-          ) // 记录鼠标移动时坐标
-          this.draw(e.changedTouches[0].pageX, e.changedTouches[0].pageY)
-        }
-      }.bind(this)
-    )
-
-    // 结束绘制 闭合线路
-    this.canvas.addEventListener(
-      'touchend',
-      function (e) {
-        if (!this.eraserFlag) {
-          if (this.trace.length > 0) {
+          // console.log('start')
+          if (!this.eraserFlag) {
+            // console.log(e)
+            // console.log(test)
+            this.beginAndMove(
+              e.changedTouches[0].pageX - this.minusX,
+              e.changedTouches[0].pageY - this.minusY
+            )
             this.traceInput(
-              e.changedTouches[0].pageX,
-              e.changedTouches[0].pageY,
-              true
-            ) // 记录鼠标结束时坐标
+              e.changedTouches[0].pageX - this.minusX,
+              e.changedTouches[0].pageY - this.minusY,
+              false
+            ) // 记录鼠标开始时坐标
           }
+        }.bind(this)
+      )
 
-          // this.close()
-          // this.penShape() // 抬笔添加笔锋
-        }
-      }.bind(this)
-    )
-    /* 禁止移动端默认拖拽事件 */
-    document.body.addEventListener(
-      'touchmove',
-      function (e) {
-        e.preventDefault()
-      },
-      { passive: false }
-    )
-    /*
+      // 绘制中 touchmove 当手指在屏幕上滑动的时候连续地触发 思路为连续触发lineTo事件
+      this.canvas.addEventListener(
+        'touchmove',
+        function (e) {
+          // console.log('move')
+
+          if (!this.eraserFlag) {
+            // console.log(e.changedTouches[0].pageX,event.changedTouches[0].pageY)
+            this.traceInput(
+              e.changedTouches[0].pageX - this.minusX,
+              e.changedTouches[0].pageY - this.minusY,
+              false
+            ) // 记录鼠标移动时坐标
+            this.draw(
+              e.changedTouches[0].pageX - this.minusX,
+              e.changedTouches[0].pageY - this.minusY
+            )
+          }
+        }.bind(this)
+      )
+
+      // 结束绘制 闭合线路
+      this.canvas.addEventListener(
+        'touchend',
+        function (e) {
+          // console.log('end')
+
+          if (!this.eraserFlag) {
+            if (this.trace.length > 0) {
+              this.traceInput(
+                e.changedTouches[0].pageX - this.minusX,
+                e.changedTouches[0].pageY - this.minusY,
+                true
+              ) // 记录鼠标结束时坐标
+            }
+            this.draw(
+              e.changedTouches[0].pageX - this.minusX,
+              e.changedTouches[0].pageY - this.minusY
+            )
+            // this.close()
+            // this.penShape() // 抬笔添加笔锋
+          }
+          // console.log('end', this.trace)
+        }.bind(this)
+      )
+      /* 禁止移动端默认拖拽事件 */
+      document.body.addEventListener(
+        'touchmove',
+        function (e) {
+          e.preventDefault()
+        },
+        { passive: false }
+      )
+      /* 移动端橡皮擦 */
+      this.canvas.addEventListener(
+        'touchstart',
+        function (e) {
+          if (this.eraserFlag) {
+            if (this.eraserTrace.length === 2) {
+              // 清除上一次的轨迹
+              this.eraserTrace = []
+            }
+            this.eraserTraceInput(
+              e.changedTouches[0].pageX - this.minusX,
+              e.changedTouches[0].pageY - this.minusY
+            )
+            // console.log(this.eraserTrace)
+          }
+        }.bind(this)
+      )
+
+      this.canvas.addEventListener(
+        'touchend',
+        function (e) {
+          // console.log(this.eraserFlag)
+          if (this.eraserFlag) {
+            this.eraserTraceInput(
+              e.changedTouches[0].pageX - this.minusX,
+              e.changedTouches[0].pageY - this.minusY
+            )
+            // console.log(this.eraserTrace)
+            // 相交检测并根据检测结果擦除
+            this.eraserTheLine()
+            this.eraserTrace = []
+          }
+        }.bind(this)
+      )
+    } else {
+      /*
       PC端  回调函数使用bind传入this
     */
-    this.canvas.addEventListener(
-      'mousedown',
-      function (e) {
-        if (!this.eraserFlag) {
-          this.traceInput(e.pageX, e.pageY, false) // 记录鼠标开始时坐标
-          this.beginAndMove(e.pageX, e.pageY)
-          this.flag = true // 鼠标移动绘制时的标志量
-        }
-      }.bind(this)
-    )
-    this.canvas.addEventListener(
-      'mousemove',
-      function (e) {
-        if (!this.eraserFlag && this.flag) {
-          this.traceInput(e.pageX, e.pageY, false) // 记录鼠标移动时坐标
-          this.draw(e.pageX, e.pageY)
-        }
-      }.bind(this)
-    )
-    this.canvas.addEventListener(
-      // 这个事件很重要 否则在使用导航栏时会出现bug
-      'mouseout',
-      function (e) {
-        // this.traceInput(e.pageX, e.pageY, true)
-        this.flag = false // 标志归位
-      }.bind(this)
-    )
-    this.canvas.addEventListener(
-      'mouseup',
-      function (e) {
-        if (!this.eraserFlag) {
-          if (this.trace.length > 0) {
-            this.traceInput(e.pageX, e.pageY, true) // 记录鼠标结束时坐标
+      this.canvas.addEventListener(
+        'mousedown',
+        function (e) {
+          if (!this.eraserFlag) {
+            // console.log(e)
+            this.traceInput(e.layerX, e.layerY, false) // 记录鼠标开始时坐标
+            this.beginAndMove(e.layerX, e.layerY)
+            this.flag = true // 鼠标移动绘制时的标志量
           }
+        }.bind(this)
+      )
+      this.canvas.addEventListener(
+        'mousemove',
+        function (e) {
+          if (!this.eraserFlag && this.flag) {
+            this.traceInput(e.layerX, e.layerY, false) // 记录鼠标移动时坐标
+            this.draw(e.layerX, e.layerY)
+          }
+        }.bind(this)
+      )
+      this.canvas.addEventListener(
+        // 这个事件很重要 否则在使用导航栏时会出现bug
+        'mouseout',
+        function (e) {
+          // this.traceInput(e.pageX, e.pageY, true)
           this.flag = false // 标志归位
-          // this.penShape() // 抬笔添加笔锋
-        }
+        }.bind(this)
+      )
+      this.canvas.addEventListener(
+        'mouseup',
+        function (e) {
+          if (!this.eraserFlag) {
+            if (this.trace.length > 0) {
+              this.traceInput(e.layerX, e.layerY, true) // 记录鼠标结束时坐标
+            }
+            this.flag = false // 标志归位
+            this.draw(e.layerX, e.layerY)
+            // this.penShape() // 抬笔添加笔锋
+          }
 
-        // console.log(this.trace)
-      }.bind(this)
-    )
+          // console.log(this.trace)
+        }.bind(this)
+      )
 
-    /* 移动端橡皮擦 */
-    this.canvas.addEventListener(
-      'touchstart',
-      function (e) {
-        if (this.eraserFlag) {
-          if (this.eraserTrace.length === 2) {
-            // 清除上一次的轨迹
+      /* PC端橡皮擦 */
+      this.canvas.addEventListener(
+        'mousedown',
+        function (e) {
+          if (this.eraserFlag) {
+            if (this.eraserTrace.length === 2) {
+              // 清除上一次的轨迹
+              this.eraserTrace = []
+            }
+            this.eraserTraceInput(e.layerX, e.layerY)
+            // console.log(this.eraserTrace)
+          }
+        }.bind(this)
+      )
+
+      this.canvas.addEventListener(
+        'mouseup',
+        function (e) {
+          // console.log(this.eraserFlag)
+          if (this.eraserFlag) {
+            this.eraserTraceInput(e.layerX, e.layerY)
+            // console.log(this.eraserTrace)
+            // 相交检测并根据检测结果擦除
+            this.eraserTheLine()
             this.eraserTrace = []
           }
-          this.eraserTraceInput(
-            e.changedTouches[0].pageX,
-            e.changedTouches[0].pageY
-          )
-          // console.log(this.eraserTrace)
-        }
-      }.bind(this)
-    )
-
-    this.canvas.addEventListener(
-      'touchend',
-      function (e) {
-        // console.log(this.eraserFlag)
-        if (this.eraserFlag) {
-          this.eraserTraceInput(
-            e.changedTouches[0].pageX,
-            e.changedTouches[0].pageY
-          )
-          // console.log(this.eraserTrace)
-          // 相交检测并根据检测结果擦除
-          this.eraserTheLine()
-        }
-      }.bind(this)
-    )
-
-    /* PC端橡皮擦 */
-    this.canvas.addEventListener(
-      'mousedown',
-      function (e) {
-        if (this.eraserFlag) {
-          if (this.eraserTrace.length === 2) {
-            // 清除上一次的轨迹
-            this.eraserTrace = []
-          }
-          this.eraserTraceInput(e.pageX, e.pageY)
-          // console.log(this.eraserTrace)
-        }
-      }.bind(this)
-    )
-
-    this.canvas.addEventListener(
-      'mouseup',
-      function (e) {
-        // console.log(this.eraserFlag)
-        if (this.eraserFlag) {
-          this.eraserTraceInput(e.pageX, e.pageY)
-          // console.log(this.eraserTrace)
-          // 相交检测并根据检测结果擦除
-          this.eraserTheLine()
-        }
-      }.bind(this)
-    )
+        }.bind(this)
+      )
+    }
 
     /* 检测窗口变化大小 如果发生变化会清除面板和重绘数据 */
     window.addEventListener(
@@ -774,12 +880,9 @@ export default {
         }.bind(this)
       }.bind(this)
     )
-    this.fileInputBtn.addEventListener(
-      'click',
-      function (e) {
-        this.value = ''
-      }
-    )
+    this.fileInputBtn.addEventListener('click', function (e) {
+      this.value = ''
+    })
     /* 图片导入 */
     this.imageInputBtn.addEventListener(
       'change',
@@ -790,16 +893,13 @@ export default {
         reader.onload = function (e) {
           this.imageToInsert = e.target.result
           this.drawImageOnCanvas()
-          // console.log(this.imageToInsert)
+          console.log(this.imageToInsert)
         }.bind(this)
       }.bind(this)
     )
-    this.imageInputBtn.addEventListener(
-      'click',
-      function (e) {
-        this.value = ''
-      }
-    )
+    this.imageInputBtn.addEventListener('click', function (e) {
+      this.value = ''
+    })
   }
 }
 </script>
@@ -815,6 +915,10 @@ export default {
   position: absolute;
   top: 50%;
   transform: translate(0, -50%); /* 50%为自身尺寸的一半 */
+}
+
+.extra-show-item {
+  overflow: visible;
 }
 .pen-width-input {
   width: 43px;
@@ -849,5 +953,13 @@ export default {
   display: block;
   width: 100%;
   height: 100%;
+}
+</style>
+
+<style>
+.m-colorPicker .box {
+  position: absolute;
+  left: -681%;
+  top: 169%;
 }
 </style>

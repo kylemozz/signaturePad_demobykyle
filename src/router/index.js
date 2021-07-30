@@ -7,7 +7,7 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    redirect: '/login'
+    redirect: '/signature'
   },
   {
     // 配置登录组件路由
@@ -19,6 +19,11 @@ const routes = [
     path: '/signature',
     name: 'Signature',
     component: () => import('../views/Signature/Signature.vue')
+  },
+  {
+    path: '/home',
+    home: 'Home',
+    component: () => import('../views/Home.vue')
   }
 ]
 
