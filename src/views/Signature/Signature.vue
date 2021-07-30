@@ -15,7 +15,7 @@
           class="pen-width-input"
         />
       </a-menu-item>
-      <a-menu-item key="1" class="menu-item">
+      <a-menu-item class="menu-item">
         <a-button
           class="menu-btn small-width"
           id="clearCanvas"
@@ -26,7 +26,7 @@
           ></a-button
         >
       </a-menu-item>
-      <a-menu-item key="2" class="menu-item">
+      <a-menu-item class="menu-item">
         格式：
         <a-select
           label-in-value
@@ -47,7 +47,7 @@
         </a-select>
       </a-menu-item>
 
-      <a-menu-item key="3" class="menu-item">
+      <a-menu-item class="menu-item">
         <a-button class="menu-btn small-width" id="saveCanvas" @click="clear()"
           ><a-icon class="small-margin-right" type="delete" /><span
             class="btn-text"
@@ -55,7 +55,7 @@
           ></a-button
         >
       </a-menu-item>
-      <a-menu-item key="4" class="menu-item">
+      <a-menu-item class="menu-item">
         <a-button
           @click="rePaint()"
           class="menu-btn small-width"
@@ -63,7 +63,7 @@
           >重绘</a-button
         >
       </a-menu-item>
-      <a-menu-item key="5" class="menu-item">
+      <a-menu-item class="menu-item">
         <a-button
           @click="clearTrace()"
           class="menu-btn small-width"
@@ -71,7 +71,7 @@
           >清除重绘</a-button
         >
       </a-menu-item>
-      <a-menu-item key="6" class="menu-item">
+      <a-menu-item class="menu-item">
         <a-button
           class="menu-btn small-width"
           @click="saveTraceAsJSON()"
@@ -79,26 +79,26 @@
           >导出重绘</a-button
         >
       </a-menu-item>
-      <a-menu-item key="7" class="menu-item">
+      <a-menu-item class="menu-item">
         <a-button class="menu-btn small-width" @click="fileInput()"
           >导入重绘</a-button
         >
         {{ file.length > 0 ? file[0].name : "none" }}
         <input id="fileInputBtn" type="file" multiple />
       </a-menu-item>
-      <a-menu-item key="8" class="menu-item">
+      <a-menu-item class="menu-item">
         <a-button class="menu-btn small-width" @click="imageInput()"
           >导入图片</a-button
         >
         {{ image.length > 0 ? image[0].name : "none" }}
         <input style="display:none;" id="imageInputBtn" type="file" multiple />
       </a-menu-item>
-      <a-menu-item key="9" class="menu-item">
+      <a-menu-item class="menu-item">
         <a-button class="menu-btn small-width" @click="traceBackWard()"
           >撤回</a-button
         >
       </a-menu-item>
-      <a-menu-item key="10" class="menu-item">
+      <a-menu-item class="menu-item">
         <a-button
           :type="eraserFlag ? 'primary' : ''"
           class="menu-btn small-width"
@@ -106,7 +106,7 @@
           >橡皮擦</a-button
         >
       </a-menu-item>
-      <a-menu-item key="11" class="menu-item">
+      <a-menu-item class="menu-item">
         <a-button class="menu-btn small-width" @click="penShape()"
           >笔锋</a-button
         >
