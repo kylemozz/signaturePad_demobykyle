@@ -434,6 +434,11 @@ export default {
     /* 属性初始化 */
     porpertyInit () {
       // 这里设置宽高等于可见宽高很重要
+      alert('resize trigger')
+      console.log('WindowclientWidth', document.body.clientWidth)
+      console.log('WindowclientHieght', document.body.clientHeight)
+      console.log('CanvasclientWidth', this.canvas.clientWidth)
+      console.log('CanvasclientHieght', this.canvas.clientHeight)
       this.canvas.width = this.canvas.clientWidth
       this.canvas.height = this.canvas.clientHeight
       // this.windowToCanvas() // 强制与窗口化大小保持一致
