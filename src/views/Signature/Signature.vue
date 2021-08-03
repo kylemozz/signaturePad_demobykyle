@@ -16,10 +16,7 @@
         />
       </a-menu-item>
       <a-menu-item class="menu-item">
-        <a-button
-          class="menu-btn small-width"
-          id="clearCanvas"
-          @click="download()"
+        <a-button class="menu-btn small-width" @click="download()"
           ><a-icon class="small-margin-right" type="download" /><span
             class="btn-text"
             >保存</span

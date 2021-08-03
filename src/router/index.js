@@ -22,8 +22,13 @@ const routes = [
   },
   {
     path: '/home',
-    home: 'Home',
+    name: 'Home',
     component: () => import('../views/Home.vue')
+  },
+  {
+    path: '/elementUI',
+    name: '/elementUi',
+    component: () => import('../views/elementUI.vue')
   }
 ]
 

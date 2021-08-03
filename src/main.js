@@ -2,6 +2,9 @@ import Vue from 'vue'
 import App from './App.vue' // 引入主组件
 import router from './router' // 引入路由
 import store from './store' // 引入store
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+
 //  Ant Design Vue相关文件 组件采用按需引入的方式
 import {
   Button,
@@ -30,6 +33,8 @@ Vue.use(Divider)
 Vue.use(InputNumber)
 Vue.use(vcolorpicker)
 
+// 注册Element ui
+Vue.use(ElementUI)
 new Vue({
   router,
   store,
