@@ -54,7 +54,9 @@
         ><el-button @click="traceBackWard()">撤回</el-button></el-menu-item
       >
       <el-menu-item class="menu-item" index="7"
-        ><el-button @click="eraserTrigger()">橡皮擦</el-button></el-menu-item
+        ><el-button :type="eraserFlag ? 'primary' : ''" @click="eraserTrigger()"
+          >橡皮擦</el-button
+        ></el-menu-item
       >
       <el-menu-item class="menu-item" index="7"
         ><el-button @click="penShape()">笔锋</el-button></el-menu-item
@@ -81,6 +83,7 @@
     <signatureCore
       @updateBtnHight="updateBtnHight"
       @updateImgFlag="updateImgFlag"
+      @updateEraserFlag="updateEraserFlag"
       :imageType="imageType"
       :lineWidth="Number(width)"
       :lineColor="color"
@@ -106,6 +109,7 @@ export default {
       ],
       imageType: '', // 传入子组件的图片类型
       btnHighlight: false, // 按钮高亮标志量
+      eraserFlag: false, // 橡皮擦标志位
       imgFlag: false, // 图片缓存标志量
       width: 3, // 笔粗细
       color: '#000' // 笔颜色
@@ -167,6 +171,11 @@ export default {
     /* 更新图片标志量 */
     updateImgFlag (newValue) {
       this.imgFlag = newValue
+    },
+    /* 更新橡皮擦标志量 */
+    updateEraserFlag (newValue) {
+      console.log(newValue)
+      this.eraserFlag = newValue
     }
   },
   components: { signatureCore }

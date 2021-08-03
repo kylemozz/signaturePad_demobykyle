@@ -258,6 +258,7 @@ export default {
     },
     eraserTrigger () {
       this.eraserFlag = !this.eraserFlag
+      this.$emit('updateEraserFlag', this.eraserFlag)
       this.eraserTrace = [] // 清空上一次的橡皮擦轨迹数组
     },
     image2Canvas (penFlag) {
