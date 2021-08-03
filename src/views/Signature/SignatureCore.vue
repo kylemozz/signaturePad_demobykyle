@@ -429,13 +429,8 @@ export default {
     /* 属性初始化 */
     porpertyInit () {
       // 这里设置宽高等于可见宽高很重要
-      console.log('WindowclientWidth', document.body.clientWidth)
-      console.log('WindowclientHieght', document.body.clientHeight)
-      console.log('CanvasclientWidth', this.canvas.clientWidth)
-      console.log('CanvasclientHieght', this.canvas.clientHeight)
       this.canvas.width = this.canvas.clientWidth
       this.canvas.height = this.canvas.clientHeight
-      // this.windowToCanvas() // 强制与窗口化大小保持一致
       this.cxt = this.canvas.getContext('2d')
       this.cxt.fillStyle = this.canvasBgColor // 填充颜色设定
       this.cxt.fillRect(0, 0, this.canvas.width, this.canvas.height) // 画一个矩形 大小占满canvas 当做背景
@@ -709,7 +704,7 @@ export default {
 
     /* 检测窗口变化大小 如果发生变化会清除面板和重绘数据 */
     window.addEventListener(
-      'resize',
+      'orientationchange',
       function () {
         // location.reload()
         // alert('window resize')
