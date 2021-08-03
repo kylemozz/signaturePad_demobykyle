@@ -358,11 +358,6 @@ export default {
         end: flag
       })
     },
-    /* 窗口测试 */
-    // wdMonitor () {
-    //   console.log(this.canvas.width, this.canvas.height)
-    //   console.log(window.innerWidth, window.innerHeight)
-    // },
     /* 利用轨迹数据重新绘制 */
     rePaintTrace () {
       var branchFlag = true
@@ -434,7 +429,6 @@ export default {
     /* 属性初始化 */
     porpertyInit () {
       // 这里设置宽高等于可见宽高很重要
-      alert('resize trigger')
       console.log('WindowclientWidth', document.body.clientWidth)
       console.log('WindowclientHieght', document.body.clientHeight)
       console.log('CanvasclientWidth', this.canvas.clientWidth)
@@ -719,6 +713,7 @@ export default {
       function () {
         // location.reload()
         // alert('window resize')
+        this.mobileCompute() // 重新计算偏移值
         this.porpertyInit() // 需要重新初始化属性
         // this.clearTrace() // 需要清除重绘数据
         this.rePaint()
