@@ -441,8 +441,10 @@ export default {
       //   this.canvas.width = this.canvas.clientWidth
       //   this.canvas.height = this.canvas.clientHeight
       // }
+
       this.canvas.width = this.canvas.clientWidth
       this.canvas.height = this.canvas.clientHeight
+
       // console.log('Width', this.canvas.width)
       // console.log('Height', this.canvas.height)
 
@@ -720,15 +722,18 @@ export default {
 
     /* 检测窗口变化大小 如果发生变化会清除面板和重绘数据 */
     window.addEventListener(
-      'resize',
+      'orientationchange',
       function () {
-        // location.reload()
+        // orientationchange事件必须设置延迟 不然宽高获取会出错
         // alert('resize')
-        this.mobileCompute() //
-        // console.log(this.minusX, this.minusY)
-        this.porpertyInit() // 需要重新初始化属性
+        setTimeout(() => {
+          this.mobileCompute() //
+          // console.log(this.minusX, this.minusY)
+          this.porpertyInit() // 需要重新初始化属性
+          this.rePaint()
+        }, 200)
+
         // this.clearTrace() // 需要清除重绘数据
-        this.rePaint()
       }.bind(this)
     )
     /* 文件选择并导入新轨迹 */
