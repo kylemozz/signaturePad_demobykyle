@@ -112,7 +112,7 @@ export default {
       this.trace = this.trace.concat(this.newTrace)
     },
     /* 计算移动端偏移值 */
-    mobileCompute () {
+    mobileCompute (flag = false) {
       this.minusX = this.canvas.getBoundingClientRect().x
       this.minusY = this.canvas.getBoundingClientRect().y
     },
@@ -427,10 +427,25 @@ export default {
       }
     },
     /* 属性初始化 */
-    porpertyInit () {
+    porpertyInit (flag = false) {
       // 这里设置宽高等于可见宽高很重要
+      // console.log('WindowclientWidth', document.body.clientWidth)
+      // console.log('WindowclientHeight', document.body.clientHeight)
+      // console.log('WindowclientWidth', this.canvas.clientWidth)
+      // console.log('WindowclientHeight', this.canvas.clientHeight)
+      // console.log(flag)
+      // if (flag) {
+      //   this.canvas.width = this.canvas.clientHeight
+      //   this.canvas.height = this.canvas.clientWidth
+      // } else {
+      //   this.canvas.width = this.canvas.clientWidth
+      //   this.canvas.height = this.canvas.clientHeight
+      // }
       this.canvas.width = this.canvas.clientWidth
       this.canvas.height = this.canvas.clientHeight
+      // console.log('Width', this.canvas.width)
+      // console.log('Height', this.canvas.height)
+
       this.cxt = this.canvas.getContext('2d')
       this.cxt.fillStyle = this.canvasBgColor // 填充颜色设定
       this.cxt.fillRect(0, 0, this.canvas.width, this.canvas.height) // 画一个矩形 大小占满canvas 当做背景
@@ -494,6 +509,7 @@ export default {
     },
     /* canvas画布强制跟着窗口大小(建议每次加载强制触发) 未真机测试 */
     windowToCanvas () {
+      console.log(window.innerWidth, window.innerHeight)
       this.canvas.width = window.innerWidth
       this.canvas.height = window.innerHeight
     }
@@ -704,11 +720,12 @@ export default {
 
     /* 检测窗口变化大小 如果发生变化会清除面板和重绘数据 */
     window.addEventListener(
-      'orientationchange',
+      'resize',
       function () {
         // location.reload()
-        // alert('window resize')
-        this.mobileCompute() // 重新计算偏移值
+        // alert('resize')
+        this.mobileCompute() //
+        // console.log(this.minusX, this.minusY)
         this.porpertyInit() // 需要重新初始化属性
         // this.clearTrace() // 需要清除重绘数据
         this.rePaint()
