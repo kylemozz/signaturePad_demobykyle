@@ -84,6 +84,8 @@
       @updateBtnHight="updateBtnHight"
       @updateImgFlag="updateImgFlag"
       @updateEraserFlag="updateEraserFlag"
+      @uploadImageToFather="uploadImageToFather"
+      @uploadTraceToFather="uploadTraceJSONToFather"
       :imageType="imageType"
       :lineWidth="Number(width)"
       :lineColor="color"
@@ -176,6 +178,26 @@ export default {
     updateEraserFlag (newValue) {
       console.log(newValue)
       this.eraserFlag = newValue
+    },
+    // 内部图片传出
+    uploadImageToFather (img) {
+      // console.log(img)
+      this.img = img
+    },
+    // 内部json传出
+    uploadTraceJSONToFather (traceJSON) {
+      this.traceJSON = traceJSON
+      console.log(this.traceJSON)
+    },
+    injectJSON () { // 向手写板传入JSON
+      // 获取json文件的请求
+      var json = 'hello just test'
+      this.$refs.sigCore.injectJSON(json)
+    },
+    injectImage () { // 向手写板传入image
+      // 获取图片文件的请求
+      var image = 'hello I am image' // 格式 data:image/jpeg;base64
+      this.$refs.sigCore.injectImage(image)
     }
   },
   components: { signatureCore }

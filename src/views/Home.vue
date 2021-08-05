@@ -51,7 +51,7 @@ export default {
     injectImage () { // 向手写板传入image
       // 获取图片文件的请求
       var image = 'hello I am image' // 格式 data:image/jpeg;base64
-      this.$$refs.signaturePad.injectImage(image)
+      this.$refs.signaturePad.injectImage(image)
     }
   }
 }
