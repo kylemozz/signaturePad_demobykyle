@@ -350,6 +350,16 @@ export default {
     eraserTraceInput (x, y) {
       this.eraserTrace.push({ x: x, y: y })
     },
+    /* 输入轨迹起点 起点记录标志位 颜色 宽度 */
+    traceInputBegin (x, y, flag, color, width) {
+      this.trace.push({
+        x: x,
+        y: y,
+        start: flag,
+        color: color,
+        width: width
+      })
+    },
     /* 输入轨迹 */
     traceInput (x, y, flag) {
       this.trace.push({
@@ -367,6 +377,10 @@ export default {
         if (branchFlag) {
           this.beginAndMove(this.trace[i].x, this.trace[i].y)
           branchFlag = false
+          if (this.trace[i].start) {
+            this.colorChange(this.trace[i].color)
+            this.penSizeChange(this.trace[i].width)
+          }
           continue
         }
         if (this.trace[i].end) {
@@ -388,14 +402,16 @@ export default {
     },
     /* 改变笔触颜色 注意要改两种颜色一种是线的颜色 一种时阴影的颜色 */
     colorChange (color) {
-      this.cxt.strokeStyle = color
-      this.cxt.shadowColor = color
+      this.color = color
+      this.cxt.strokeStyle = this.color
+      this.cxt.shadowColor = this.color
     },
     /* 改变笔触粗细 注意笔触属性接受值为number */
     penSizeChange (width) {
       // console.log(e) // e.data
       // console.log(typeof this.lineWidth) //用户输入均为字符串
-      let lineWidth = Number(width)
+      this.width = width
+      let lineWidth = Number(this.width)
       if (lineWidth <= 0 || lineWidth > 10 || isNaN(lineWidth)) {
         // 范围判定 只接受1-10
         // console.log('请输入1-10以内的数值')
@@ -546,10 +562,12 @@ export default {
               e.changedTouches[0].pageX - this.minusX,
               e.changedTouches[0].pageY - this.minusY
             )
-            this.traceInput(
+            this.traceInputBegin(
               e.changedTouches[0].pageX - this.minusX,
               e.changedTouches[0].pageY - this.minusY,
-              false
+              true,
+              this.color,
+              this.width
             ) // 记录鼠标开始时坐标
           }
         }.bind(this)
@@ -651,7 +669,13 @@ export default {
         function (e) {
           if (!this.eraserFlag) {
             // console.log(e)
-            this.traceInput(e.layerX, e.layerY, false) // 记录鼠标开始时坐标
+            this.traceInputBegin(
+              e.layerX,
+              e.layerY,
+              true,
+              this.color,
+              this.width
+            ) // 记录鼠标开始时坐标
             this.beginAndMove(e.layerX, e.layerY)
             this.flag = true // 鼠标移动绘制时的标志量
           }
