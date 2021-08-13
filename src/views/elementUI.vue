@@ -109,7 +109,7 @@ export default {
           label: 'png'
         }
       ],
-      imageType: '', // 传入子组件的图片类型
+      imageType: 'jpg', // 传入子组件的图片类型
       btnHighlight: false, // 按钮高亮标志量
       eraserFlag: false, // 橡皮擦标志位
       imgFlag: false, // 图片缓存标志量

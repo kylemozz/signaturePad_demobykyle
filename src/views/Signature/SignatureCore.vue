@@ -1,8 +1,9 @@
 <template>
-  <div class="canvas_container">
+  <div class="canvas_container" id="canvas_container">
     <canvas id="canvas"></canvas>
     <input id="fileInputBtn" type="file" multiple />
     <input style="display:none;" id="imageInputBtn" type="file" multiple />
+    <iframe ref="frame" name="frame" style="width:0;height:0"></iframe>
   </div>
 </template>
 
@@ -258,12 +259,16 @@ export default {
     },
     eraserTrigger () {
       this.eraserFlag = !this.eraserFlag
+      const cursorIcon = require('./eraser.png') // base64
+      this.canvas.style.cursor = this.eraserFlag
+        ? `url(${cursorIcon}),auto`
+        : 'default'
       this.$emit('updateEraserFlag', this.eraserFlag)
       this.eraserTrace = [] // 清空上一次的橡皮擦轨迹数组
     },
     image2Canvas (penFlag) {
       var img = new Image()
-      // console.log(this.imageToInsert)
+      console.log(this.imageToInsert)
       img.src = this.imageToInsert
       // 异步事件的使用要特别注意
       img.onload = function () {
@@ -489,6 +494,37 @@ export default {
     close () {
       // this.cxt.closePath()
     },
+    openDownloadDialog (url, saveName) {
+      if (typeof url === 'object' && url instanceof Blob) {
+        url = URL.createObjectURL(url) // 创建blob地址
+      }
+      var aLink = document.createElement('a')
+      aLink.href = url
+      aLink.download = saveName || '' // HTML5新增的属性，指定保存文件名，可以不要后缀，注意，file:///模式下不会生效
+      var event
+      if (window.MouseEvent) event = new MouseEvent('click')
+      else {
+        event = document.createEvent('MouseEvents')
+        event.initMouseEvent(
+          'click',
+          true,
+          false,
+          window,
+          0,
+          0,
+          0,
+          0,
+          0,
+          false,
+          false,
+          false,
+          false,
+          0,
+          null
+        )
+      }
+      aLink.dispatchEvent(event)
+    },
     /* 下载签名并保存成图片 应该接收参数决定保存成图片的类型 */
     download () {
       if (this.imageType === 'jpg') {
@@ -496,10 +532,10 @@ export default {
       } else if (this.imageType === 'png') {
         img = this.canvas.toDataURL('image/png')
       }
-
       var downLoadLink = document.createElement('a')
-      downLoadLink.href = img
       downLoadLink.download = 'mySignature'
+      downLoadLink.href = img
+      console.log(downLoadLink)
       downLoadLink.click() // 触发点击事件进行下载
       this.$emit('uploadImageToFather', img)
     },
@@ -667,6 +703,7 @@ export default {
       this.canvas.addEventListener(
         'mousedown',
         function (e) {
+          // console.log(e)
           if (!this.eraserFlag) {
             // console.log(e)
             this.traceInputBegin(
@@ -786,8 +823,8 @@ export default {
         reader.readAsDataURL(this.image[0])
         reader.onload = function (e) {
           this.imageToInsert = e.target.result
+          console.log(this.imageToInsert)
           this.drawImageOnCanvas()
-          // console.log(this.imageToInsert)
         }.bind(this)
       }.bind(this)
     )
