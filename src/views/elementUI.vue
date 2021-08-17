@@ -2,7 +2,7 @@
   <div class="container">
     <el-menu class="el-menu-demo" mode="horizontal">
       <el-menu-item class="menu-item" index="1"
-        ><el-button @click="download()">保存</el-button></el-menu-item
+        ><el-button @click="download">保存</el-button></el-menu-item
       >
       <el-menu-item class="menu-item" index="2">
         格式：
@@ -21,47 +21,53 @@
         </el-select>
       </el-menu-item>
       <el-menu-item class="menu-item" index="3"
-        ><el-button @click="clear()">清除</el-button></el-menu-item
+        ><el-button @click="clear">清除</el-button></el-menu-item
       >
       <el-menu-item class="menu-item" index="4"
         ><el-button
           :type="btnHighlight || imgFlag ? 'primary' : ''"
-          @click="repaint()"
+          @click="repaint"
           >重绘</el-button
         ></el-menu-item
       >
       <el-menu-item class="menu-item" index="5"
         ><el-button
           :type="btnHighlight || imgFlag ? 'primary' : ''"
-          @click="clearTrace()"
+          @click="clearTrace"
           >清除重绘</el-button
         ></el-menu-item
       >
       <el-menu-item class="menu-item" index="6"
         ><el-button
           :type="btnHighlight || imgFlag ? 'primary' : ''"
-          @click="saveTraceAsJSON()"
+          @click="saveTraceAsJSON"
           >导出重绘</el-button
         ></el-menu-item
       >
       <el-menu-item class="menu-item" index="7"
-        ><el-button @click="fileInput()">导入重绘</el-button></el-menu-item
+        ><el-button @click="fileInput">导入重绘</el-button></el-menu-item
       >
-      <el-menu-item class="menu-item" index="7" @click="imageInput()"
+      <el-menu-item class="menu-item" index="8" @click="imageInput"
         ><el-button>导入图片</el-button></el-menu-item
       >
-      <el-menu-item class="menu-item" index="7"
-        ><el-button @click="traceBackWard()">撤回</el-button></el-menu-item
+      <el-menu-item class="menu-item" index="9"
+        ><el-button @click="traceBackWard">撤回</el-button></el-menu-item
       >
-      <el-menu-item class="menu-item" index="7"
-        ><el-button :type="eraserFlag ? 'primary' : ''" @click="eraserTrigger()"
+      <el-menu-item class="menu-item" index="10"
+        ><el-button :type="eraserFlag ? 'primary' : ''" @click="eraserTrigger"
           >橡皮擦</el-button
         ></el-menu-item
       >
-      <el-menu-item class="menu-item" index="7"
-        ><el-button @click="penShape()">笔锋</el-button></el-menu-item
+      <el-menu-item class="menu-item" index="11"
+        ><el-button @click="penShape">笔锋</el-button></el-menu-item
       >
-      <el-menu-item class="menu-item" index="7">
+      <el-menu-item class="menu-item" index="12">
+        <el-button @click="scaleUp">放大</el-button>
+      </el-menu-item>
+      <el-menu-item class="menu-item" index="13">
+        <el-button @click="scaleDown">缩小</el-button>
+      </el-menu-item>
+      <el-menu-item class="menu-item" index="14">
         <span>粗细：</span>
         <el-input
           class="width-input"
@@ -72,12 +78,15 @@
         >
         </el-input>
       </el-menu-item>
-      <el-menu-item class="menu-item" index="7">
+      <el-menu-item class="menu-item" index="15">
         <span>颜色：</span>
         <el-color-picker
           @change="colorChange(color)"
           v-model="color"
         ></el-color-picker>
+      </el-menu-item>
+      <el-menu-item class="menu-item" index="16">
+        <span>放大倍数{{magnifi}}</span>
       </el-menu-item>
     </el-menu>
     <signatureCore
@@ -86,6 +95,7 @@
       @updateEraserFlag="updateEraserFlag"
       @uploadImageToFather="uploadImageToFather"
       @uploadTraceToFather="uploadTraceJSONToFather"
+      @updateMagnifi="updateMagnifi"
       :imageType="imageType"
       :lineWidth="Number(width)"
       :lineColor="color"
@@ -114,10 +124,19 @@ export default {
       eraserFlag: false, // 橡皮擦标志位
       imgFlag: false, // 图片缓存标志量
       width: 3, // 笔粗细
-      color: '#000' // 笔颜色
+      color: '#000', // 笔颜色
+      magnifi: 1 // 放大倍数
     }
   },
   methods: {
+    /* 放大功能入口 */
+    scaleDown () {
+      this.$refs.sigCore.scaleDown()
+    },
+    /* 放大功能入口 */
+    scaleUp () {
+      this.$refs.sigCore.scaleUp()
+    },
     /* 下载功能入口 */
     download () {
       this.$refs.sigCore.download()
@@ -166,6 +185,10 @@ export default {
     colorChange (color) {
       this.$refs.sigCore.colorChange(color)
     },
+    /* 更新放大倍数 */
+    updateMagnifi (newValue) {
+      this.magnifi = newValue
+    },
     /* 更新按钮标志量 */
     updateBtnHight (newValue) {
       this.btnHighlight = newValue
@@ -189,12 +212,14 @@ export default {
       this.traceJSON = traceJSON
       console.log(this.traceJSON)
     },
-    injectJSON () { // 向手写板传入JSON
+    injectJSON () {
+      // 向手写板传入JSON
       // 获取json文件的请求
       var json = 'hello just test'
       this.$refs.sigCore.injectJSON(json)
     },
-    injectImage () { // 向手写板传入image
+    injectImage () {
+      // 向手写板传入image
       // 获取图片文件的请求
       var image = 'hello I am image' // 格式 data:image/jpeg;base64
       this.$refs.sigCore.injectImage(image)

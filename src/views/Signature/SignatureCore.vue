@@ -50,7 +50,8 @@ export default {
       minusX: '', // 移动端画布x轴偏移值
       minusY: '', // 移动端画布y轴偏移值
       color: this.lineColor,
-      width: this.lineWidth
+      width: this.lineWidth,
+      magnifi: 1
     }
   },
   watch: {
@@ -73,13 +74,29 @@ export default {
     }
   },
   methods: {
-    showMenu () {
-      this.openKeys = this.openKeys2
+    /* 缩小 */
+    scaleDown () {
+      this.magnifi /= 2
+      this.cxt.scale(0.5, 0.5)
+      this.clearCanvas()
+      this.rePaintTrace()
+      this.$emit('updateMagnifi', this.magnifi)
     },
-    openChange () {
-      this.openKeys2 = this.openKeys
-      // console.log(this.openKeys)
+    /* 放大 */
+    scaleUp () {
+      this.magnifi *= 2
+      console.log(this.minusX, this.minusY)
+
+      this.cxt.scale(2, 2)
+      // this.trace.map(item => {
+      //   item.x /= 2
+      //   item.y /= 2
+      // })
+      this.clearCanvas()
+      this.rePaintTrace()
+      this.$emit('updateMagnifi', this.magnifi)
     },
+
     /* 外部图片传入 */
     injectImage (image) {
       // console.log(image)
@@ -470,8 +487,18 @@ export default {
     },
     /* 清除当前canvas的内容 */
     clearCanvas () {
-      this.cxt.clearRect(0, 0, this.canvas.width, this.canvas.height)
-      this.cxt.fillRect(0, 0, this.canvas.width, this.canvas.height) // 再绘制一次背景因为会连背景也清除
+      this.cxt.clearRect(
+        0,
+        0,
+        this.canvas.width / this.magnifi,
+        this.canvas.height / this.magnifi
+      )
+      this.cxt.fillRect(
+        0,
+        0,
+        this.canvas.width / this.magnifi,
+        this.canvas.height / this.magnifi
+      ) // 再绘制一次背景因为会连背景也清除
     },
     /* 清除当前轨迹数据 */
     clearTrace () {
@@ -505,8 +532,8 @@ export default {
         */
           // console.log('start')
           if (!this.eraserFlag) {
-            const X = e.changedTouches[0].pageX - this.minusX
-            const Y = e.changedTouches[0].pageY - this.minusY
+            const X = (e.changedTouches[0].pageX - this.minusX) / this.magnifi
+            const Y = (e.changedTouches[0].pageY - this.minusY) / this.magnifi
             this.beginAndMove(X, Y)
             this.traceInputBegin(X, Y, true, this.color, this.width) // 记录鼠标开始时坐标
           }
@@ -518,8 +545,8 @@ export default {
         'touchmove',
         function (e) {
           if (!this.eraserFlag) {
-            const X = e.changedTouches[0].pageX - this.minusX
-            const Y = e.changedTouches[0].pageY - this.minusY
+            const X = (e.changedTouches[0].pageX - this.minusX) / this.magnifi
+            const Y = (e.changedTouches[0].pageY - this.minusY) / this.magnifi
             this.traceInput(X, Y, false) // 记录鼠标移动时坐标
             this.draw(X, Y)
           }
@@ -531,8 +558,8 @@ export default {
         'touchend',
         function (e) {
           if (!this.eraserFlag) {
-            const X = e.changedTouches[0].pageX - this.minusX
-            const Y = e.changedTouches[0].pageY - this.minusY
+            const X = (e.changedTouches[0].pageX - this.minusX) / this.magnifi
+            const Y = (e.changedTouches[0].pageY - this.minusY) / this.magnifi
             if (this.trace.length > 0) {
               this.traceInput(X, Y, true) // 记录鼠标结束时坐标
             }
@@ -556,8 +583,8 @@ export default {
         'touchstart',
         function (e) {
           if (this.eraserFlag) {
-            const X = e.changedTouches[0].pageX - this.minusX
-            const Y = e.changedTouches[0].pageY - this.minusY
+            const X = (e.changedTouches[0].pageX - this.minusX) / this.magnifi
+            const Y = (e.changedTouches[0].pageY - this.minusY) / this.magnifi
             if (this.eraserTrace.length === 2) {
               // 清除上一次的轨迹
               this.eraserTrace = []
@@ -573,8 +600,8 @@ export default {
         function (e) {
           // console.log(this.eraserFlag)
           if (this.eraserFlag) {
-            const X = e.changedTouches[0].pageX - this.minusX
-            const Y = e.changedTouches[0].pageY - this.minusY
+            const X = (e.changedTouches[0].pageX - this.minusX) / this.magnifi
+            const Y = (e.changedTouches[0].pageY - this.minusY) / this.magnifi
             this.eraserTraceInput(X, Y)
             // console.log(this.eraserTrace)
             // 相交检测并根据检测结果擦除
@@ -592,8 +619,8 @@ export default {
         function (e) {
           // console.log(e)
           if (!this.eraserFlag) {
-            const X = e.layerX
-            const Y = e.layerY
+            const X = e.layerX / this.magnifi
+            const Y = e.layerY / this.magnifi
             this.traceInputBegin(X, Y, true, this.color, this.width) // 记录鼠标开始时坐标
             this.beginAndMove(X, Y)
             this.flag = true // 鼠标移动绘制时的标志量
@@ -604,8 +631,8 @@ export default {
         'mousemove',
         function (e) {
           if (!this.eraserFlag && this.flag) {
-            const X = e.layerX
-            const Y = e.layerY
+            const X = e.layerX / this.magnifi
+            const Y = e.layerY / this.magnifi
             this.traceInput(X, Y, false) // 记录鼠标移动时坐标
             this.draw(X, Y)
           }
@@ -623,8 +650,8 @@ export default {
         'mouseup',
         function (e) {
           if (!this.eraserFlag) {
-            const X = e.layerX
-            const Y = e.layerY
+            const X = e.layerX / this.magnifi
+            const Y = e.layerY / this.magnifi
             if (this.trace.length > 0) {
               this.traceInput(X, Y, true) // 记录鼠标结束时坐标
             }
@@ -642,8 +669,8 @@ export default {
         'mousedown',
         function (e) {
           if (this.eraserFlag) {
-            const X = e.layerX
-            const Y = e.layerY
+            const X = e.layerX / this.magnifi
+            const Y = e.layerY / this.magnifi
             if (this.eraserTrace.length === 2) {
               // 清除上一次的轨迹
               this.eraserTrace = []
@@ -659,8 +686,8 @@ export default {
         function (e) {
           // console.log(this.eraserFlag)
           if (this.eraserFlag) {
-            const X = e.layerX
-            const Y = e.layerY
+            const X = e.layerX / this.magnifi
+            const Y = e.layerY / this.magnifi
             this.eraserTraceInput(X, Y)
             // console.log(this.eraserTrace)
             // 相交检测并根据检测结果擦除
