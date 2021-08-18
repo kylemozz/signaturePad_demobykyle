@@ -79,22 +79,25 @@ export default {
       this.magnifi /= 2
       this.cxt.scale(0.5, 0.5)
       this.clearCanvas()
+      if (this.imageToInsert) {
+        this.drawImageOnCanvas()
+      }
       this.rePaintTrace()
       this.$emit('updateMagnifi', this.magnifi)
+      // console.log(this.canvas.width, this.canvas.height)
     },
     /* 放大 */
     scaleUp () {
       this.magnifi *= 2
-      console.log(this.minusX, this.minusY)
 
       this.cxt.scale(2, 2)
-      // this.trace.map(item => {
-      //   item.x /= 2
-      //   item.y /= 2
-      // })
       this.clearCanvas()
+      if (this.imageToInsert) {
+        this.drawImageOnCanvas()
+      }
       this.rePaintTrace()
       this.$emit('updateMagnifi', this.magnifi)
+      // console.log(this.canvas.width, this.canvas.height)
     },
 
     /* 外部图片传入 */
@@ -268,7 +271,11 @@ export default {
       img.src = this.imageToInsert
       // 异步事件的使用要特别注意
       img.onload = function () {
+        // this.cxt.drawImage(img, 0, 0, this.canvas.width, this.canvas.height)
+        const preColor = this.color
+        this.colorChange('#FFFFFF')
         this.cxt.drawImage(img, 0, 0)
+        this.colorChange(preColor)
         // 重画之前的轨迹
         if (this.trace.length > 0 && penFlag) {
           this.penShapeCompute()
@@ -438,6 +445,7 @@ export default {
       this.cxt = this.canvas.getContext('2d')
       this.cxt.fillStyle = this.canvasBgColor // 填充颜色设定
       this.cxt.fillRect(0, 0, this.canvas.width, this.canvas.height) // 画一个矩形 大小占满canvas 当做背景
+      // this.drawBackground()
       this.cxt.strokeStyle = this.lineColor // 边框颜色设定
       this.cxt.lineWidth = this.lineWidth // 线条粗细设定
       this.cxt.lineCap = 'round' // 线条末端设定 为圆形
@@ -493,12 +501,14 @@ export default {
         this.canvas.width / this.magnifi,
         this.canvas.height / this.magnifi
       )
+
       this.cxt.fillRect(
         0,
         0,
         this.canvas.width / this.magnifi,
         this.canvas.height / this.magnifi
       ) // 再绘制一次背景因为会连背景也清除
+      // this.drawBackground()
     },
     /* 清除当前轨迹数据 */
     clearTrace () {
@@ -740,7 +750,7 @@ export default {
         reader.readAsDataURL(this.image[0])
         reader.onload = function (e) {
           this.imageToInsert = e.target.result
-          console.log(this.imageToInsert)
+          // console.log(this.imageToInsert)
           this.drawImageOnCanvas()
         }.bind(this)
       }.bind(this)
